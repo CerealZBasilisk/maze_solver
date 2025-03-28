@@ -1,4 +1,5 @@
 from tkinter import Tk, BOTH, Canvas
+import time
 
 
 class Window:
@@ -15,10 +16,6 @@ class Window:
         self.canvas.pack(side="top")
         self.running = False
         self.root.protocol("WM_DELETE_WINDOW", self.close)
-
-
-    def run(self):
-        pass
 
     def draw_line(self, line, fill_color):
         line.draw(self.canvas, fill_color=fill_color)
@@ -121,28 +118,54 @@ class Maze:
         cell_size_y,
         win,
     ):
-        
+        self._cells = []
+        self.x1=x1
+        self.y1=y1
+        self.num_rows=num_rows
+        self.num_cols=num_cols
+        self.cell_size_x=cell_size_x
+        self.cell_size_y=cell_size_y
+        self.win=win
+        self._create_cells()
+
+    def _create_cells(self):
+        for i in range(self.num_cols):
+            column = []
+            for j in range(self.num_rows):
+                # Calculate cell position relative to maze position
+                x1 = self.x1 + (i * self.cell_size_x)
+                y1 = self.y1 + (j * self.cell_size_y)
+                x2 = x1 + self.cell_size_x
+                y2 = y1 + self.cell_size_y
+                # Create cell with the calculated position
+                cell = Cell(Point(x1, y1), Point(x2, y2), window=self.win)
+                column.append(cell)
+            self._cells.append(column)
     
+        # Draw all cells after the grid is created
+        for i in range(self.num_cols):
+            for j in range(self.num_rows):
+                self._draw_cell(i, j)
+
+
+        pass
+    def _draw_cell(self, i, j):
+        cell = self._cells[i][j]
+        cell.draw()
+        self._animate()
+
+
+    def _animate(self):
+        self.win.redraw()
+        time.sleep(0.05)
+
+
 def main():
     win = Window(800, 600) # use 800 by 600 for final
 
-    # Create two cells side by side
-    cell_1 = Cell(Point(100, 100), Point(150, 150), window=win)
-    cell_2 = Cell(Point(150, 100), Point(200, 150), window=win)
-
-    # Draw both cells
-    cell_1.draw()
-    cell_2.draw()
-
-    # Draw a move from cell_1 to cell_2 (red line)
-    cell_1.draw_move(to_cell=cell_2)
-
-    # Optional: draw a move back (gray undo line)
-    cell_2.draw_move(to_cell=cell_1, undo=True)
-
-
-
-
+    # Create a maze with a 10x10 grid of cells
+    maze = Maze(50, 50, 10, 10, 50, 50, win)
+    
     win.wait_for_close()
 
 
